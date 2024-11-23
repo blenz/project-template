@@ -1,0 +1,32 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      target: dev
+    ports: [3000:3000]
+    volumes: [./backend:/backend]
+    depends_on: [db]
+    environment:
+      - ENV=local
+      - PORT=3000
+      - DB_HOST=db
+      - DB_USER=local
+      - DB_PASS=local
+      - DB_NAME=local
+
+  frontend:
+    build:
+      context: ./frontend
+      target: dev
+    ports: [4000:4000]
+    volumes: 
+      - ./frontend:/frontend
+      - /frontend/node_modules
+    depends_on: [backend]
+
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: local
+      POSTGRES_PASSWORD: local
+      POSTGRES_DB: local
