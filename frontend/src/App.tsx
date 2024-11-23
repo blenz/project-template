@@ -1,10 +1,12 @@
-import './App.css'
+import Layout from './components/layout/layout'
 
 function App() {
   return (
     <>
       <div>
-        <p className='text-green-500'>Hello World!!</p>
+        <Layout>
+          <p className="text-red-500">Hello World!!</p>
+        </Layout>
       </div>
     </>
   )
