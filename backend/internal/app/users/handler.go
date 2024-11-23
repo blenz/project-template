@@ -14,7 +14,7 @@ func NewHandler(repo Repository) *handler {
 	}
 }
 
-func (h handler) RegisterRoutes(router *echo.Echo) {
+func (h handler) RegisterRoutes(router *echo.Group) {
 	r := router.Group("/users")
 	r.POST("", h.create)
 	r.GET("/:id", h.find)

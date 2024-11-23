@@ -24,11 +24,13 @@ func NewServer(cfg *Config, db *sql.DB) (server, func()) {
 		cfg: cfg,
 	}
 
+	api := srv.rtr.Group("/api")
+
 	for _, handler := range []Handler{
 		NewHandler(srv.db),
 		users.NewHandler(users.NewRepository(srv.db)),
 	} {
-		handler.RegisterRoutes(srv.rtr)
+		handler.RegisterRoutes(api)
 	}
 
 	return srv, func() { srv.rtr.Close() }
