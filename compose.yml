@@ -18,10 +18,9 @@ services:
     build:
       context: ./frontend
       target: dev
+    tty: true
     ports: [4000:4000]
-    volumes: 
-      - ./frontend:/frontend
-      - /frontend/node_modules
+    volumes: [./frontend:/frontend]
     depends_on: [backend]
 
   db:
