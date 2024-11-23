@@ -1,13 +1,17 @@
+import { BrowserRouter, Route, Routes } from 'react-router'
 import Layout from './components/layout/layout'
+import HomePage from './pages/home'
 
 function App() {
   return (
     <>
-      <div>
+      <BrowserRouter>
         <Layout>
-          <p className="text-red-500">Hello World!!</p>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+          </Routes>
         </Layout>
-      </div>
+      </BrowserRouter>
     </>
   )
 }
