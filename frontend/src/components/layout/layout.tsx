@@ -1,4 +1,5 @@
 import React, { ReactNode } from 'react'
+import { useAuth } from '../../contexts/auth'
 import Header from './navbar'
 
 interface LayoutProps {
@@ -6,10 +7,12 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
+  const { user } = useAuth()
+
   return (
     <div>
-      <Header />
-      <main className="m-10 border-2 border-green-500">{children}</main>
+      {user && <Header />}
+      <main>{children}</main>
     </div>
   )
 }

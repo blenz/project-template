@@ -21,8 +21,7 @@ func NewHandler(db *sql.DB) Handler {
 }
 
 func (h handler) RegisterRoutes(router *echo.Group) {
-	r := router.Group("/app")
-	r.GET("/health", h.health)
+	router.GET("/health", h.health)
 }
 
 func (h handler) health(c echo.Context) error {

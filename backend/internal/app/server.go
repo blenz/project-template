@@ -2,9 +2,11 @@ package app
 
 import (
 	"database/sql"
+	"test-app/internal/app/auth"
 	"test-app/internal/app/users"
 
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type Server interface {
@@ -26,8 +28,14 @@ func NewServer(cfg *Config, db *sql.DB) (server, func()) {
 
 	api := srv.rtr.Group("/api")
 
+	api.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:4000"},
+		AllowCredentials: true,
+	}))
+
 	for _, handler := range []Handler{
 		NewHandler(srv.db),
+		auth.NewHandler(),
 		users.NewHandler(users.NewRepository(srv.db)),
 	} {
 		handler.RegisterRoutes(api)
