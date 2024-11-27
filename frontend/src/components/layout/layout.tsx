@@ -10,9 +10,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user } = useAuth()
 
   return (
-    <div>
+    <div className={`min-h-screen ${user || 'bg-slate-400'}`}>
       {user && <Header />}
-      <main>{children}</main>
+      <main className="p-16">{children}</main>
     </div>
   )
 }
