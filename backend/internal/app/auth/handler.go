@@ -20,20 +20,18 @@ func (h handler) RegisterRoutes(router *echo.Group) {
 }
 
 func (h handler) session(c echo.Context) error {
-	cookie, err := c.Cookie("session")
+	sess, err := c.Cookie("session")
 	if err != nil {
-		return c.JSON(400, sessionResponse{})
+		return c.JSON(400, user{})
 	}
 
-	resp := sessionResponse{}
-	if cookie.Value == "123" {
-		resp = sessionResponse{
-			Username: "test",
-			Token:    "test",
-		}
+	user := user{}
+	if sess.Value == "123" {
+		user.Username = "test"
+		user.Token = "test"
 	}
 
-	return c.JSON(200, resp)
+	return c.JSON(200, user)
 }
 
 func (h handler) login(c echo.Context) error {
@@ -44,7 +42,7 @@ func (h handler) login(c echo.Context) error {
 	}
 
 	// simple auth for now
-	if req.Username != "test" && req.Password != "test" {
+	if !(req.Username == "test" && req.Password == "test") {
 		return c.NoContent(400)
 	}
 
@@ -53,7 +51,10 @@ func (h handler) login(c echo.Context) error {
 		Value: "123",
 	})
 
-	return c.NoContent(200)
+	return c.JSON(200, user{
+		Username: req.Username,
+		Token:    "test",
+	})
 }
 
 func (h handler) logout(c echo.Context) error {
@@ -61,5 +62,6 @@ func (h handler) logout(c echo.Context) error {
 		Name:   "session",
 		MaxAge: -1,
 	})
+
 	return c.NoContent(200)
 }

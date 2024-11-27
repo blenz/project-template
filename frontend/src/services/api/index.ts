@@ -2,7 +2,7 @@ import axios from 'axios'
 import { User } from '../../contexts/auth'
 
 const client = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://localhost:3000/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
@@ -11,15 +11,16 @@ const client = axios.create({
 
 export const api = {
   auth: {
-    login: async (username: string, password: string): Promise<void> => {
-      await client.post('/api/auth/login', { username, password })
+    login: async (username: string, password: string): Promise<User> => {
+      const resp = await client.post('/auth/login', { username, password })
+      return resp.data as User
     },
     logout: async (): Promise<void> => {
-      await client.get('/api/auth/logout')
+      await client.get('/auth/logout')
     },
-    session: async (): Promise<{ id: string; user: User }> => {
-      const resp = await client.get('/api/auth/session')
-      return { id: '1', user: resp.data as User }
+    session: async (): Promise<User> => {
+      const resp = await client.get('/auth/session')
+      return resp.data as User
     },
   },
 }

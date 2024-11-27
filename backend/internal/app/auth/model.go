@@ -1,6 +1,6 @@
 package auth
 
-type sessionResponse struct {
+type user struct {
 	Username string `json:"username"`
 	Token    string `json:"token"`
 }
