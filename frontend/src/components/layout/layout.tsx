@@ -9,9 +9,17 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user } = useAuth()
 
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-slate-400">
+        <main>{children}</main>
+      </div>
+    )
+  }
+
   return (
-    <div className={`min-h-screen ${user || 'bg-slate-400'}`}>
-      {user && <Header />}
+    <div className="min-h-screen">
+      <Header />
       <main className="p-16">{children}</main>
     </div>
   )
