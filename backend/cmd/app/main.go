@@ -14,6 +14,8 @@ func main() {
 		DBUser: os.Getenv("DB_USER"),
 		DBPass: os.Getenv("DB_PASS"),
 		DBName: os.Getenv("DB_NAME"),
+
+		JWTSecret: os.Getenv("JWT_SECRET"),
 	}
 
 	db, close := app.NewDatabase(cfg)

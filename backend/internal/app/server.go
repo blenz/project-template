@@ -28,17 +28,21 @@ func NewServer(cfg *Config, db *sql.DB) (server, func()) {
 
 	api := srv.rtr.Group("/api")
 
-	api.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     []string{"http://localhost:4000"},
-		AllowCredentials: true,
-	}))
+	api.Use(
+		middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins:     []string{"http://localhost:4000"},
+			AllowCredentials: true,
+		}),
+	)
 
 	for _, handler := range []Handler{
 		NewHandler(srv.db),
-		auth.NewHandler(),
+
+		auth.NewHandler(auth.NewService(cfg.JWTSecret)),
+
 		users.NewHandler(users.NewRepository(srv.db)),
 	} {
-		handler.RegisterRoutes(api)
+		handler.RegisterRoutes(api, auth.ValidateSession(cfg.JWTSecret))
 	}
 
 	return srv, func() { srv.rtr.Close() }

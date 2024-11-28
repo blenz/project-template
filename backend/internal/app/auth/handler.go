@@ -6,62 +6,50 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type handler struct{}
-
-func NewHandler() *handler {
-	return &handler{}
+type handler struct {
+	service Service
 }
 
-func (h handler) RegisterRoutes(router *echo.Group) {
+func NewHandler(service Service) handler {
+	return handler{
+		service: service,
+	}
+}
+
+func (h handler) RegisterRoutes(router *echo.Group, auth echo.MiddlewareFunc) {
 	r := router.Group("/auth")
 	r.POST("/login", h.login)
 	r.GET("/logout", h.logout)
-	r.GET("/session", h.session)
+	r.GET("/session", auth(h.session))
 }
 
 func (h handler) session(c echo.Context) error {
-	sess, err := c.Cookie("session")
+	_, err := c.Cookie("token")
 	if err != nil {
 		return c.JSON(400, user{})
 	}
 
-	user := user{}
-	if sess.Value == "123" {
-		user.Username = "test"
-		user.Token = "test"
-	}
-
-	return c.JSON(200, user)
+	return c.JSON(200, user{})
 }
 
 func (h handler) login(c echo.Context) error {
 	req := loginRequest{}
-
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
 
-	// simple auth for now
-	if !(req.Username == "test" && req.Password == "test") {
+	token, err := h.service.Authenticate(req.Username, req.Password)
+	if err != nil {
 		return c.NoContent(400)
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:  "session",
-		Value: "123",
-	})
+	c.SetCookie(&http.Cookie{Name: "token", Value: token})
 
-	return c.JSON(200, user{
-		Username: req.Username,
-		Token:    "test",
-	})
+	return c.JSON(200, user{Username: req.Username})
 }
 
 func (h handler) logout(c echo.Context) error {
-	c.SetCookie(&http.Cookie{
-		Name:   "session",
-		MaxAge: -1,
-	})
+	c.SetCookie(&http.Cookie{Name: "token", MaxAge: -1})
 
 	return c.NoContent(200)
 }

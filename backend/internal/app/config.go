@@ -8,4 +8,6 @@ type Config struct {
 	DBUser string
 	DBPass string
 	DBName string
+
+	JWTSecret string
 }
