@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"test-app/internal/app"
+	"time"
 )
 
 func main() {
@@ -16,6 +17,13 @@ func main() {
 		DBName: os.Getenv("DB_NAME"),
 
 		JWTSecret: os.Getenv("JWT_SECRET"),
+
+		SessionTTL: func() time.Duration {
+			if ttl, err := time.ParseDuration(os.Getenv("SESSION_TTL")); err == nil {
+				return ttl
+			}
+			return 5 * time.Minute
+		}(),
 	}
 
 	db, close := app.NewDatabase(cfg)

@@ -12,13 +12,16 @@ func ValidateSession(jwtSecret string) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			token, err := c.Cookie("token")
 			if err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, "Could not get session")
+				return echo.NewHTTPError(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 			}
 
 			keyFunc := func(t *jwt.Token) (interface{}, error) { return []byte(jwtSecret), nil }
 
 			if _, err = jwt.Parse(token.Value, keyFunc); err != nil {
-				return echo.NewHTTPError(http.StatusBadRequest, "Invalid token")
+				token.MaxAge = -1
+				token.Path = "/"
+				c.SetCookie(token)
+				return echo.NewHTTPError(http.StatusUnauthorized, http.StatusText(http.StatusUnauthorized))
 			}
 
 			return next(c)

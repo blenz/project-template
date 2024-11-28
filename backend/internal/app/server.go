@@ -38,7 +38,7 @@ func NewServer(cfg *Config, db *sql.DB) (server, func()) {
 	for _, handler := range []Handler{
 		NewHandler(srv.db),
 
-		auth.NewHandler(auth.NewService(cfg.JWTSecret)),
+		auth.NewHandler(auth.NewService(cfg.JWTSecret, cfg.SessionTTL), cfg.SessionTTL),
 
 		users.NewHandler(users.NewRepository(srv.db)),
 	} {

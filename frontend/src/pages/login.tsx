@@ -1,12 +1,12 @@
 import { FormEvent, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router'
+import { useNavigate } from 'react-router'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { useAuth } from '../contexts/auth'
 
 const LoginPage = () => {
   const navigate = useNavigate()
-  const { user, login } = useAuth()
+  const { loggedIn, login } = useAuth()
 
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
@@ -23,7 +23,7 @@ const LoginPage = () => {
     }
   }
 
-  if (user) return <Navigate to="/" />
+  // if (loggedIn) return <Navigate to="/" />
 
   return (
     <div className="flex min-h-screen items-center justify-center">

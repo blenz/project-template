@@ -1,5 +1,7 @@
 package app
 
+import "time"
+
 type Config struct {
 	Env  string
 	Port string
@@ -9,5 +11,6 @@ type Config struct {
 	DBPass string
 	DBName string
 
-	JWTSecret string
+	JWTSecret  string
+	SessionTTL time.Duration
 }

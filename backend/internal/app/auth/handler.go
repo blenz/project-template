@@ -2,17 +2,20 @@ package auth
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/labstack/echo/v4"
 )
 
 type handler struct {
-	service Service
+	service    Service
+	sessionTTL time.Duration
 }
 
-func NewHandler(service Service) handler {
+func NewHandler(service Service, sessionTTL time.Duration) handler {
 	return handler{
-		service: service,
+		service:    service,
+		sessionTTL: sessionTTL,
 	}
 }
 
@@ -24,8 +27,8 @@ func (h handler) RegisterRoutes(router *echo.Group, auth echo.MiddlewareFunc) {
 }
 
 func (h handler) session(c echo.Context) error {
-	_, err := c.Cookie("token")
-	if err != nil {
+	time.Sleep(3 * time.Second)
+	if _, err := c.Cookie("token"); err != nil {
 		return c.JSON(400, user{})
 	}
 
@@ -43,13 +46,22 @@ func (h handler) login(c echo.Context) error {
 		return c.NoContent(400)
 	}
 
-	c.SetCookie(&http.Cookie{Name: "token", Value: token})
+	c.SetCookie(&http.Cookie{
+		Name:    "token",
+		Value:   token,
+		Path:    "/",
+		Expires: time.Now().Add(h.sessionTTL),
+	})
 
 	return c.JSON(200, user{Username: req.Username})
 }
 
 func (h handler) logout(c echo.Context) error {
-	c.SetCookie(&http.Cookie{Name: "token", MaxAge: -1})
+	c.SetCookie(&http.Cookie{
+		Name:   "token",
+		Path:   "/",
+		MaxAge: -1,
+	})
 
 	return c.NoContent(200)
 }

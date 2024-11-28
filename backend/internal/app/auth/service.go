@@ -12,12 +12,14 @@ type Service interface {
 }
 
 type service struct {
-	jwtSecret string
+	jwtSecret  string
+	sessionTTL time.Duration
 }
 
-func NewService(jwtSecret string) service {
+func NewService(jwtSecret string, sessionTTL time.Duration) service {
 	return service{
-		jwtSecret: jwtSecret,
+		jwtSecret:  jwtSecret,
+		sessionTTL: sessionTTL,
 	}
 }
 
@@ -31,7 +33,7 @@ func (s service) Authenticate(username, password string) (string, error) {
 		jwt.SigningMethodHS256,
 		jwt.MapClaims{
 			"username": username,
-			"exp":      time.Now().Add(time.Minute).Unix(),
+			"exp":      time.Now().Add(s.sessionTTL).Unix(),
 		},
 	)
 

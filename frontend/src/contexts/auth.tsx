@@ -1,43 +1,47 @@
+import Cookies from 'js-cookie'
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { api } from '../services/api'
 
-export interface User {
-  username: string
-}
-
 interface AuthContextType {
-  user: User | null
-  logout: Function
+  loggedIn: boolean
   login: Function
+  logout: Function
 }
 
 interface AuthProviderProps {
   children: ReactNode
 }
 
-const AuthContext = createContext<AuthContextType>({ user: null, login: () => {}, logout: () => {} })
+const AuthContext = createContext<AuthContextType>({
+  loggedIn: false,
+  login: () => {},
+  logout: () => {},
+})
 
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null)
+  const [loggedIn, setLoggedIn] = useState<boolean>(!!Cookies.get('token'))
 
   useEffect(() => {
     ;(async () => {
-      const user = await api.auth.session()
-      setUser(user)
+      try {
+        await api.auth.session()
+      } catch {
+        setLoggedIn(false)
+      }
     })()
   }, [])
 
   const login = async (username: string, password: string) => {
-    const user = await api.auth.login(username, password)
-    setUser(user)
+    await api.auth.login(username, password)
+    setLoggedIn(true)
   }
 
   const logout = async () => {
     await api.auth.logout()
-    setUser(null)
+    setLoggedIn(false)
   }
 
-  return <AuthContext.Provider value={{ user, logout, login }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ loggedIn, logout, login }}>{children}</AuthContext.Provider>
 }
