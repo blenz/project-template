@@ -3,8 +3,8 @@ import { Navigate, Outlet } from 'react-router'
 import { useAuth } from '../contexts/auth'
 
 const ProtectedRoutes: React.FC = () => {
-  const { loggedIn } = useAuth()
-  return loggedIn ? <Outlet /> : <Navigate to="/login" />
+  const { hasSession } = useAuth()
+  return hasSession ? <Outlet /> : <Navigate to="/login" />
 }
 
 export default ProtectedRoutes

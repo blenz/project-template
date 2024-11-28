@@ -11,6 +11,6 @@ type Config struct {
 	DBPass string
 	DBName string
 
-	JWTSecret  string
-	SessionTTL time.Duration
+	SessionTTL    time.Duration
+	SessionSecret string
 }

@@ -4,8 +4,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
+
+const sessionCookie = "session"
 
 type handler struct {
 	service    Service
@@ -14,24 +18,25 @@ type handler struct {
 
 func NewHandler(service Service, sessionTTL time.Duration) handler {
 	return handler{
-		service:    service,
-		sessionTTL: sessionTTL,
+		service: service,
 	}
 }
 
-func (h handler) RegisterRoutes(router *echo.Group, auth echo.MiddlewareFunc) {
+func (h handler) RegisterRoutes(router *echo.Group) {
 	r := router.Group("/auth")
 	r.POST("/login", h.login)
 	r.GET("/logout", h.logout)
-	r.GET("/session", auth(h.session))
+	r.GET("/session", h.session)
 }
 
 func (h handler) session(c echo.Context) error {
-	time.Sleep(3 * time.Second)
-	if _, err := c.Cookie("token"); err != nil {
-		return c.JSON(400, user{})
+	sess, err := session.Get(sessionCookie, c)
+	if err != nil || sess.IsNew {
+		return err
 	}
-
+	if sess.IsNew {
+		return c.NoContent(http.StatusUnauthorized)
+	}
 	return c.JSON(200, user{})
 }
 
@@ -41,27 +46,38 @@ func (h handler) login(c echo.Context) error {
 		return err
 	}
 
-	token, err := h.service.Authenticate(req.Username, req.Password)
-	if err != nil {
+	if err := h.service.Authenticate(req.Username, req.Password); err != nil {
 		return c.NoContent(400)
 	}
 
-	c.SetCookie(&http.Cookie{
-		Name:    "token",
-		Value:   token,
-		Path:    "/",
-		Expires: time.Now().Add(h.sessionTTL),
-	})
+	sess, err := session.Get(sessionCookie, c)
+	if err != nil {
+		return err
+	}
+	sess.Options = &sessions.Options{
+		Path:   "/",
+		MaxAge: int(h.sessionTTL.Seconds()),
+	}
+
+	sess.Values["id"] = "123"
+
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return err
+	}
 
 	return c.JSON(200, user{Username: req.Username})
 }
 
 func (h handler) logout(c echo.Context) error {
-	c.SetCookie(&http.Cookie{
-		Name:   "token",
-		Path:   "/",
-		MaxAge: -1,
-	})
+	sess, err := session.Get(sessionCookie, c)
+	if err != nil {
+		return err
+	}
 
-	return c.NoContent(200)
+	sess.Options.MaxAge = -1
+	if err := sess.Save(c.Request(), c.Response()); err != nil {
+		return err
+	}
+
+	return c.NoContent(204)
 }

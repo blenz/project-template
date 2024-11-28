@@ -3,7 +3,7 @@ import React, { createContext, ReactNode, useContext, useEffect, useState } from
 import { api } from '../services/api'
 
 interface AuthContextType {
-  loggedIn: boolean
+  hasSession: boolean
   login: Function
   logout: Function
 }
@@ -13,7 +13,7 @@ interface AuthProviderProps {
 }
 
 const AuthContext = createContext<AuthContextType>({
-  loggedIn: false,
+  hasSession: false,
   login: () => {},
   logout: () => {},
 })
@@ -21,27 +21,27 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [loggedIn, setLoggedIn] = useState<boolean>(!!Cookies.get('token'))
+  const [hasSession, setHasSession] = useState<boolean>(!!Cookies.get('session'))
 
   useEffect(() => {
     ;(async () => {
       try {
         await api.auth.session()
       } catch {
-        setLoggedIn(false)
+        setHasSession(false)
       }
     })()
   }, [])
 
   const login = async (username: string, password: string) => {
     await api.auth.login(username, password)
-    setLoggedIn(true)
+    setHasSession(true)
   }
 
   const logout = async () => {
     await api.auth.logout()
-    setLoggedIn(false)
+    setHasSession(false)
   }
 
-  return <AuthContext.Provider value={{ loggedIn, logout, login }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ hasSession, logout, login }}>{children}</AuthContext.Provider>
 }

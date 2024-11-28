@@ -16,8 +16,7 @@ func main() {
 		DBPass: os.Getenv("DB_PASS"),
 		DBName: os.Getenv("DB_NAME"),
 
-		JWTSecret: os.Getenv("JWT_SECRET"),
-
+		SessionSecret: os.Getenv("SESSION_SECRET"),
 		SessionTTL: func() time.Duration {
 			if ttl, err := time.ParseDuration(os.Getenv("SESSION_TTL")); err == nil {
 				return ttl

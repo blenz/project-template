@@ -7,7 +7,7 @@ import (
 )
 
 type Handler interface {
-	RegisterRoutes(parent *echo.Group, auth echo.MiddlewareFunc)
+	RegisterRoutes(parent *echo.Group)
 }
 
 type handler struct {
@@ -20,7 +20,7 @@ func NewHandler(db *sql.DB) Handler {
 	}
 }
 
-func (h handler) RegisterRoutes(router *echo.Group, auth echo.MiddlewareFunc) {
+func (h handler) RegisterRoutes(router *echo.Group) {
 	router.GET("/health", h.health)
 }
 
