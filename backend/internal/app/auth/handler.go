@@ -18,7 +18,8 @@ type handler struct {
 
 func NewHandler(service Service, sessionTTL time.Duration) handler {
 	return handler{
-		service: service,
+		service:    service,
+		sessionTTL: sessionTTL,
 	}
 }
 

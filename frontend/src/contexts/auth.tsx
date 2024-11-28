@@ -39,8 +39,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
 
   const logout = async () => {
-    await api.auth.logout()
-    setHasSession(false)
+    try {
+      await api.auth.logout()
+    } finally {
+      setHasSession(false)
+    }
   }
 
   return <AuthContext.Provider value={{ hasSession, logout, login }}>{children}</AuthContext.Provider>
