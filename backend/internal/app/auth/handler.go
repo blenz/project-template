@@ -9,7 +9,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-const sessionCookie = "session"
+const SessionCookie = "session"
 
 type handler struct {
 	service    Service
@@ -31,7 +31,7 @@ func (h handler) RegisterRoutes(router *echo.Group) {
 }
 
 func (h handler) session(c echo.Context) error {
-	sess, err := session.Get(sessionCookie, c)
+	sess, err := session.Get(SessionCookie, c)
 	if err != nil || sess.IsNew {
 		return err
 	}
@@ -51,13 +51,16 @@ func (h handler) login(c echo.Context) error {
 		return c.NoContent(400)
 	}
 
-	sess, err := session.Get(sessionCookie, c)
+	sess, err := session.Get(SessionCookie, c)
 	if err != nil {
 		return err
 	}
 	sess.Options = &sessions.Options{
-		Path:   "/",
-		MaxAge: int(h.sessionTTL.Seconds()),
+		Path:     "/",
+		MaxAge:   int(h.sessionTTL.Seconds()),
+		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		HttpOnly: true,
 	}
 
 	sess.Values["id"] = "123"
@@ -70,7 +73,7 @@ func (h handler) login(c echo.Context) error {
 }
 
 func (h handler) logout(c echo.Context) error {
-	sess, err := session.Get(sessionCookie, c)
+	sess, err := session.Get(SessionCookie, c)
 	if err != nil {
 		return err
 	}

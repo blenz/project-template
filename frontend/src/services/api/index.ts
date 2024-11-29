@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import { browserCookie, User } from '../../contexts/auth'
 
 const client = axios.create({
   baseURL: 'http://localhost:3000/api',
@@ -18,18 +19,29 @@ client.interceptors.request.use(
   error => Promise.reject(error)
 )
 
+client.interceptors.response.use(
+  response => response,
+  error => {
+    if (window.location.pathname !== '/login' && error.status === 401) {
+      browserCookie.remove()
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
 export const api = {
   auth: {
-    login: async (username: string, password: string): Promise<any> => {
+    login: async (username: string, password: string): Promise<User> => {
       const resp = await client.post('/auth/login', { username, password })
-      return resp.data
+      return resp.data as User
     },
     logout: async (): Promise<void> => {
       await client.get('/auth/logout')
     },
-    session: async (): Promise<any> => {
+    session: async (): Promise<User> => {
       const resp = await client.get('/auth/session')
-      return resp.data
+      return resp.data as User
     },
   },
 }

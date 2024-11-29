@@ -7,9 +7,9 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { hasSession } = useAuth()
+  const { authed } = useAuth()
 
-  if (!hasSession) {
+  if (!authed) {
     return (
       <div className="min-h-screen bg-slate-400">
         <main>{children}</main>

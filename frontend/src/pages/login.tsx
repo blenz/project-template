@@ -1,29 +1,27 @@
 import { FormEvent, useState } from 'react'
-import { Navigate, useNavigate } from 'react-router'
+import { Navigate } from 'react-router'
 import { Button } from '../components/ui/button'
 import { Input } from '../components/ui/input'
 import { useAuth } from '../contexts/auth'
 
 const LoginPage = () => {
-  const navigate = useNavigate()
-  const { hasSession, login } = useAuth()
+  const { authed, login } = useAuth()
 
   const [username, setUsername] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [error, setError] = useState<string | null>(null)
+
+  if (authed) return <Navigate to="/" />
 
   const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     try {
       await login(username, password)
-      navigate('/')
     } catch {
       setError('Invalid Username or Password')
     }
   }
-
-  if (hasSession) return <Navigate to="/" />
 
   return (
     <div className="flex min-h-screen items-center justify-center">
