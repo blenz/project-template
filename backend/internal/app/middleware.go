@@ -1,6 +1,7 @@
 package app
 
 import (
+	"slices"
 	"test-app/internal/app/auth"
 
 	"github.com/gorilla/sessions"
@@ -35,7 +36,11 @@ func initMiddleware(cfg *Config) []echo.MiddlewareFunc {
 				return echo.ErrUnauthorized
 			},
 			Skipper: func(c echo.Context) bool {
-				return c.Path() == "/api/auth/login"
+				return slices.Contains([]string{
+					"/api/auth/login",
+					"/api/auth/launch",
+					"/api/auth/callback",
+				}, c.Path())
 			},
 		}),
 	}

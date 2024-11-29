@@ -46,7 +46,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   const login = async (username: string, password: string) => {
-    await api.auth.login(username, password)
+    // await api.auth.login(username, password)
+    await api.auth.launch()
     browserCookie.set()
     setAuthed(true)
   }

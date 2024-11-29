@@ -37,3 +37,10 @@ services:
       POSTGRES_USER: local
       POSTGRES_PASSWORD: local
       POSTGRES_DB: local
+
+  infra:
+    image: hashicorp/terraform:1.9
+    working_dir: /infra
+    volumes: [./infra:/infra, ~/.aws:/root/.aws]
+    entrypoint: sh
+    tty: true

@@ -17,7 +17,7 @@ const LoginPage = () => {
     e.preventDefault()
 
     try {
-      await login(username, password)
+      window.location.href = 'http://localhost:3000/api/auth/launch'
     } catch {
       setError('Invalid Username or Password')
     }

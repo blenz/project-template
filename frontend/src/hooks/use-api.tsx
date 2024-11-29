@@ -57,6 +57,9 @@ const useApi = () => {
         const resp = await request(client.get, '/auth/session')
         return resp.data as User
       },
+      launch: async () => {
+        await request(client.get, '/auth/launch')
+      },
     },
   }
 

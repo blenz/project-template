@@ -23,6 +23,11 @@ func main() {
 			}
 			return 5 * time.Minute
 		}(),
+
+		CognitoClientId:     os.Getenv("COGNITO_CLIENT_ID"),
+		CognitoClientSecret: os.Getenv("COGNITO_CLIENT_SECRET"),
+		CognitoRedirectUrl:  os.Getenv("COGNITO_REDIRECT_URL"),
+		CognitoIssuerUrl:    os.Getenv("COGNITO_ISSUER_URL"),
 	}
 
 	db, close := app.NewDatabase(cfg)

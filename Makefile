@@ -1,3 +1,5 @@
+MAKEFLAGS += --always-make
+
 shell-frontend:
 	@docker compose exec frontend sh
 
@@ -9,3 +11,6 @@ build:
 
 run:
 	@docker compose up
+
+infra:
+	@docker compose exec infra sh

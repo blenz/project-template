@@ -13,4 +13,9 @@ type Config struct {
 
 	SessionTTL    time.Duration
 	SessionSecret string
+
+	CognitoClientId     string
+	CognitoClientSecret string
+	CognitoRedirectUrl  string
+	CognitoIssuerUrl    string
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"net/http"
+	"test-app/internal/app/auth/oauth"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -12,14 +13,16 @@ import (
 const SessionCookie = "session"
 
 type handler struct {
-	service    Service
-	sessionTTL time.Duration
+	service       Service
+	oauthProvider oauth.Provider
+	sessionTTL    time.Duration
 }
 
-func NewHandler(service Service, sessionTTL time.Duration) handler {
+func NewHandler(service Service, oauthProvider oauth.Provider, sessionTTL time.Duration) handler {
 	return handler{
-		service:    service,
-		sessionTTL: sessionTTL,
+		service:       service,
+		oauthProvider: oauthProvider,
+		sessionTTL:    sessionTTL,
 	}
 }
 
@@ -28,15 +31,14 @@ func (h handler) RegisterRoutes(router *echo.Group) {
 	r.POST("/login", h.login)
 	r.GET("/logout", h.logout)
 	r.GET("/session", h.session)
+	r.GET("/launch", h.launch)
+	r.GET("/callback", h.callback)
 }
 
 func (h handler) session(c echo.Context) error {
 	sess, err := session.Get(SessionCookie, c)
 	if err != nil || sess.IsNew {
 		return err
-	}
-	if sess.IsNew {
-		return c.NoContent(http.StatusUnauthorized)
 	}
 	return c.JSON(200, user{})
 }
@@ -51,21 +53,7 @@ func (h handler) login(c echo.Context) error {
 		return c.NoContent(400)
 	}
 
-	sess, err := session.Get(SessionCookie, c)
-	if err != nil {
-		return err
-	}
-	sess.Options = &sessions.Options{
-		Path:     "/",
-		MaxAge:   int(h.sessionTTL.Seconds()),
-		SameSite: http.SameSiteLaxMode,
-		Secure:   true,
-		HttpOnly: true,
-	}
-
-	sess.Values["id"] = "123"
-
-	if err := sess.Save(c.Request(), c.Response()); err != nil {
+	if err := h.setSession(c); err != nil {
 		return err
 	}
 
@@ -84,4 +72,41 @@ func (h handler) logout(c echo.Context) error {
 	}
 
 	return c.NoContent(204)
+}
+
+func (h handler) launch(c echo.Context) error {
+	url := h.oauthProvider.GetAuthURL()
+	return c.Redirect(http.StatusFound, url)
+}
+
+func (h handler) callback(c echo.Context) error {
+	code := c.QueryParam("code")
+
+	_, err := h.oauthProvider.GetIdentity(code)
+	if err != nil {
+		return err
+	}
+
+	if err := h.setSession(c); err != nil {
+		return err
+	}
+
+	return c.Redirect(http.StatusFound, "http://localhost:4000")
+}
+
+func (h handler) setSession(c echo.Context) error {
+	sess, err := session.Get(SessionCookie, c)
+	if err != nil {
+		return err
+	}
+
+	sess.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   int(h.sessionTTL.Seconds()),
+		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		HttpOnly: true,
+	}
+
+	return sess.Save(c.Request(), c.Response())
 }
