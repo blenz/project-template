@@ -12,7 +12,7 @@ import (
 func initMiddleware(cfg *Config) []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
 		middleware.CORSWithConfig(middleware.CORSConfig{
-			AllowOrigins:     []string{"http://localhost:4000"},
+			AllowOrigins:     []string{"http://localhost:3000"},
 			AllowCredentials: true,
 		}),
 

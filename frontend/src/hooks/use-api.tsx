@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { browserCookie, User } from '../contexts/auth'
 
 const client = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: '/api',
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
