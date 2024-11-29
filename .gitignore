@@ -1,2 +1,4 @@
 tmp/
 .env
+.terraform
+terraform.tfstate*
