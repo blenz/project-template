@@ -14,6 +14,7 @@ export interface User {
 }
 
 interface AuthContextType {
+  user: User | null
   authed: boolean
   login: Function
   logout: Function
@@ -24,6 +25,7 @@ interface AuthProviderProps {
 }
 
 const AuthContext = createContext<AuthContextType>({
+  user: null,
   authed: false,
   login: () => {},
   logout: () => {},
@@ -36,12 +38,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const navigate = useNavigate()
 
   const [authed, setAuthed] = useState<boolean>(browserCookie.exists())
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
     ;(async () => {
-      await api.auth.session()
+      const user = await api.auth.session()
       browserCookie.set()
       setAuthed(true)
+      setUser(user)
     })()
   }, [])
 
@@ -62,5 +66,5 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }
 
-  return <AuthContext.Provider value={{ authed, logout, login }}>{children}</AuthContext.Provider>
+  return <AuthContext.Provider value={{ user, authed, logout, login }}>{children}</AuthContext.Provider>
 }

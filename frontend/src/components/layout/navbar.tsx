@@ -3,7 +3,7 @@ import { Link } from 'react-router'
 import { useAuth } from '../../contexts/auth'
 
 const NavBar: React.FC = () => {
-  const { logout } = useAuth()
+  const { user, logout } = useAuth()
 
   return (
     <header className="bg-slate-600 px-24 py-3">
@@ -18,6 +18,7 @@ const NavBar: React.FC = () => {
           <Link to="/login" onClick={() => logout()}>
             Logout
           </Link>
+          <p>Hello, {user?.username}</p>
         </div>
       </nav>
     </header>

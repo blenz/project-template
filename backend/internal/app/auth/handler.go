@@ -37,10 +37,12 @@ func (h handler) RegisterRoutes(router *echo.Group) {
 
 func (h handler) session(c echo.Context) error {
 	sess, err := session.Get(SessionCookie, c)
-	if err != nil || sess.IsNew {
+	if err != nil {
 		return err
 	}
-	return c.JSON(200, user{})
+	return c.JSON(200, user{
+		Username: sess.Values["username"].(string),
+	})
 }
 
 func (h handler) login(c echo.Context) error {
@@ -53,7 +55,12 @@ func (h handler) login(c echo.Context) error {
 		return c.NoContent(400)
 	}
 
-	if err := h.setSession(c); err != nil {
+	sess, err := session.Get(SessionCookie, c)
+	if err != nil {
+		return err
+	}
+
+	if err := h.setSession(c, sess); err != nil {
 		return err
 	}
 
@@ -82,24 +89,26 @@ func (h handler) launch(c echo.Context) error {
 func (h handler) callback(c echo.Context) error {
 	code := c.QueryParam("code")
 
-	_, err := h.oauthProvider.GetIdentity(code)
+	username, err := h.oauthProvider.GetIdentity(code)
 	if err != nil {
 		return err
 	}
 
-	if err := h.setSession(c); err != nil {
-		return err
-	}
-
-	return c.Redirect(http.StatusFound, "http://localhost:4000")
-}
-
-func (h handler) setSession(c echo.Context) error {
 	sess, err := session.Get(SessionCookie, c)
 	if err != nil {
 		return err
 	}
 
+	sess.Values["username"] = username
+
+	if err := h.setSession(c, sess); err != nil {
+		return err
+	}
+
+	return c.Redirect(http.StatusFound, "/")
+}
+
+func (h handler) setSession(c echo.Context, sess *sessions.Session) error {
 	sess.Options = &sessions.Options{
 		Path:     "/",
 		MaxAge:   int(h.sessionTTL.Seconds()),

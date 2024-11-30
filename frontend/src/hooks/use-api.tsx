@@ -48,14 +48,14 @@ const useApi = () => {
     auth: {
       login: async (username: string, password: string): Promise<User> => {
         const resp = await request(client.post, '/auth/login', { username, password })
-        return resp.data as User
+        return resp as User
       },
       logout: async (): Promise<void> => {
         await request(client.get, '/auth/logout')
       },
       session: async (): Promise<User> => {
         const resp = await request(client.get, '/auth/session')
-        return resp.data as User
+        return resp as User
       },
       launch: async () => {
         await request(client.get, '/auth/launch')

@@ -2,10 +2,10 @@ package oauth
 
 import (
 	"context"
-	"fmt"
 	"log"
 
 	"github.com/coreos/go-oidc"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/oauth2"
 )
 
@@ -46,6 +46,11 @@ func (p provider) GetIdentity(code string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(token.Extra("id_token"))
-	return "", nil
+	idToken, _ := jwt.Parse(token.Extra("id_token").(string), func(t *jwt.Token) (interface{}, error) {
+		return "", nil
+	})
+
+	claims, _ := idToken.Claims.(jwt.MapClaims)
+
+	return claims["cognito:username"].(string), nil
 }
