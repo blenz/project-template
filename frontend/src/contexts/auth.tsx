@@ -1,10 +1,10 @@
 import Cookies from 'js-cookie'
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-import useApi from '../hooks/use-api'
+import { api } from '../services/api'
 
 export const browserCookie = {
-  set: () => Cookies.set('_auth', '1'),
+  create: () => Cookies.set('_auth', '1'),
   remove: () => Cookies.remove('_auth'),
   exists: () => !!Cookies.get('_auth'),
 }
@@ -34,7 +34,6 @@ const AuthContext = createContext<AuthContextType>({
 export const useAuth = () => useContext(AuthContext)
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { api } = useApi()
   const navigate = useNavigate()
 
   const [authed, setAuthed] = useState<boolean>(browserCookie.exists())
@@ -43,7 +42,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     ;(async () => {
       const user = await api.auth.session()
-      browserCookie.set()
+      browserCookie.create()
       setAuthed(true)
       setUser(user)
     })()
@@ -52,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (username: string, password: string) => {
     // await api.auth.login(username, password)
     await api.auth.launch()
-    browserCookie.set()
+    browserCookie.create()
     setAuthed(true)
   }
 
