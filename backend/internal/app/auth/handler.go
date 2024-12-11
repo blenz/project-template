@@ -2,7 +2,6 @@ package auth
 
 import (
 	"net/http"
-	"test-app/internal/app/auth/oauth"
 	"time"
 
 	"github.com/gorilla/sessions"
@@ -13,16 +12,16 @@ import (
 const SessionCookie = "session"
 
 type handler struct {
-	service       Service
-	oauthProvider oauth.Provider
-	sessionTTL    time.Duration
+	service Service
+	// oauthProvider oauth.Provider
+	sessionTTL time.Duration
 }
 
-func NewHandler(service Service, oauthProvider oauth.Provider, sessionTTL time.Duration) handler {
+func NewHandler(service Service, sessionTTL time.Duration) handler {
 	return handler{
-		service:       service,
-		oauthProvider: oauthProvider,
-		sessionTTL:    sessionTTL,
+		service: service,
+		// oauthProvider: oauthProvider,
+		sessionTTL: sessionTTL,
 	}
 }
 
@@ -31,8 +30,8 @@ func (h handler) RegisterRoutes(router *echo.Group) {
 	r.POST("/login", h.login)
 	r.GET("/logout", h.logout)
 	r.GET("/session", h.session)
-	r.GET("/launch", h.launch)
-	r.GET("/callback", h.callback)
+	// r.GET("/launch", h.launch)
+	// r.GET("/callback", h.callback)
 }
 
 func (h handler) session(c echo.Context) error {
@@ -60,6 +59,8 @@ func (h handler) login(c echo.Context) error {
 		return err
 	}
 
+	sess.Values["username"] = req.Username
+
 	if err := h.setSession(c, sess); err != nil {
 		return err
 	}
@@ -81,32 +82,32 @@ func (h handler) logout(c echo.Context) error {
 	return c.NoContent(204)
 }
 
-func (h handler) launch(c echo.Context) error {
-	url := h.oauthProvider.GetAuthURL()
-	return c.Redirect(http.StatusFound, url)
-}
+// func (h handler) launch(c echo.Context) error {
+// 	url := h.oauthProvider.GetAuthURL()
+// 	return c.Redirect(http.StatusFound, url)
+// }
 
-func (h handler) callback(c echo.Context) error {
-	code := c.QueryParam("code")
+// func (h handler) callback(c echo.Context) error {
+// 	code := c.QueryParam("code")
 
-	username, err := h.oauthProvider.GetIdentity(code)
-	if err != nil {
-		return err
-	}
+// 	username, err := h.oauthProvider.GetIdentity(code)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	sess, err := session.Get(SessionCookie, c)
-	if err != nil {
-		return err
-	}
+// 	sess, err := session.Get(SessionCookie, c)
+// 	if err != nil {
+// 		return err
+// 	}
 
-	sess.Values["username"] = username
+// 	sess.Values["username"] = username
 
-	if err := h.setSession(c, sess); err != nil {
-		return err
-	}
+// 	if err := h.setSession(c, sess); err != nil {
+// 		return err
+// 	}
 
-	return c.Redirect(http.StatusFound, "/")
-}
+// 	return c.Redirect(http.StatusFound, "/")
+// }
 
 func (h handler) setSession(c echo.Context, sess *sessions.Session) error {
 	sess.Options = &sessions.Options{

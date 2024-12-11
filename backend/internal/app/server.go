@@ -3,7 +3,6 @@ package app
 import (
 	"database/sql"
 	"test-app/internal/app/auth"
-	"test-app/internal/app/auth/oauth"
 	"test-app/internal/app/users"
 
 	"github.com/labstack/echo/v4"
@@ -32,11 +31,7 @@ func NewServer(cfg *Config, db *sql.DB) (server, func()) {
 	for _, handler := range []Handler{
 		NewHandler(srv.db),
 
-		auth.NewHandler(
-			auth.NewService(),
-			oauth.NewCognitoProvider(cfg.CognitoClientId, cfg.CognitoClientSecret, cfg.CognitoRedirectUrl, cfg.CognitoIssuerUrl),
-			cfg.SessionTTL,
-		),
+		auth.NewHandler(auth.NewService(), cfg.SessionTTL),
 
 		users.NewHandler(users.NewRepository(srv.db)),
 	} {

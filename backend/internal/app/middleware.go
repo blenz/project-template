@@ -12,6 +12,8 @@ import (
 
 func initMiddleware(cfg *Config) []echo.MiddlewareFunc {
 	return []echo.MiddlewareFunc{
+		middleware.Logger(),
+
 		middleware.CORSWithConfig(middleware.CORSConfig{
 			AllowOrigins:     []string{"http://localhost:3000"},
 			AllowCredentials: true,
